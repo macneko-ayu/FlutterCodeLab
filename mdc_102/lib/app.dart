@@ -13,42 +13,63 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import 'supplemental/cut_corners_border.dart';
 
+import 'backdrop.dart';
+import 'colors.dart';
 import 'home.dart';
 import 'login.dart';
-import 'colors.dart';
+import 'category_menu_page.dart';
+import 'model/product.dart';
+import 'supplemental/cut_corners_border.dart';
 
-// TODO: Convert ShrineApp to stateful widget (104)
-class ShrineApp extends StatelessWidget {
+class ShrineApp extends StatefulWidget {
   const ShrineApp({Key? key}) : super(key: key);
+
+  @override
+  _ShrineAppState createState() => _ShrineAppState();
+}
+
+class _ShrineAppState extends State<ShrineApp> {
+  Category _currentCategory = Category.all;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Shrine',
-      // TODO: Change home: to a Backdrop with a HomePage frontLayer (104)
-      home: const HomePage(),
-      // TODO: Make currentCategory field take _currentCategory (104)
-      // TODO: Pass _currentCategory for frontLayer (104)
-      // TODO: Change backLayer field value to CategoryMenuPage (104)
+      home: Backdrop(
+        currentCategory: _currentCategory,
+        frontLayer: HomePage(category: _currentCategory),
+        backLayer: CategoryMenuPage(
+          currentCategory: _currentCategory,
+          onCategoryTap: _onCategoryTap,
+        ),
+        frontTitle: const Text('SHRINE'),
+        backTitle: const Text('MENU'),
+      ),
       initialRoute: '/login',
       onGenerateRoute: _getRoute,
       theme: _kShrineTheme,
     );
   }
 
-  Route<dynamic>? _getRoute(RouteSettings settings) {
-    if (settings.name != '/login') {
-      return null;
-    }
-
-    return MaterialPageRoute<void>(
-      settings: settings,
-      builder: (BuildContext context) => const LoginPage(),
-      fullscreenDialog: true,
-    );
+  /// Function to call when a [Category] is tapped.
+  void _onCategoryTap(Category category) {
+    setState(() {
+      _currentCategory = category;
+    });
   }
+}
+
+Route<dynamic>? _getRoute(RouteSettings settings) {
+  if (settings.name != '/login') {
+    return null;
+  }
+
+  return MaterialPageRoute<void>(
+    settings: settings,
+    builder: (BuildContext context) => const LoginPage(),
+    fullscreenDialog: true,
+  );
 }
 
 final ThemeData _kShrineTheme = _buildShrineTheme();
@@ -64,7 +85,7 @@ ThemeData _buildShrineTheme() {
     ),
     textTheme: _buildShrineTextTheme(base.textTheme),
     textSelectionTheme: const TextSelectionThemeData(
-      selectionColor: kShrinePink100
+      selectionColor: kShrinePink100,
     ),
     inputDecorationTheme: const InputDecorationTheme(
       focusedBorder: CutCornersBorder(
